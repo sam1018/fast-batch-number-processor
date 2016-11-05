@@ -1,9 +1,12 @@
+#pragma once
+
 #include <algorithm> 
 #include <functional> 
 #include <cctype>
 #include <locale>
 
 // source: http://stackoverflow.com/a/217605/2790081
+
 std::string& ltrim(std::string &s)
 {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(),

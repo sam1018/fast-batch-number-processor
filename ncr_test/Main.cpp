@@ -101,8 +101,8 @@ void test_different_types()
 	compare(lld.get_invalid_inputs(), vector<string>({ to_string(_UI64_MAX) }));
 	compare(ulld.get_invalid_inputs(), vector<string>({ to_string(INT_MIN), to_string(_I64_MIN) }));
 
-	//number_sets<float> f;
-	//number_sets<string> s;
+	//number_sets<float> f; // should give static_assert, float is not an integral type
+	//number_sets<string> s; // should give static_assert, string is not an integral type
 }
 
 int main()
