@@ -20,6 +20,10 @@
 */
 
 
+/*
+	interface for class number_sets
+*/
+
 template<typename T, typename CharT = char>
 class number_sets
 {
@@ -52,8 +56,8 @@ public:
 
 
 /*
- *	implementation for class number_sets
-**/
+	Implementation for class number_sets
+*/
 
 template<typename T, typename CharT>
 number_sets<T, CharT>::number_sets()

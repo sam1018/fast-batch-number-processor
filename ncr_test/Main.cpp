@@ -1,7 +1,3 @@
-/*
-	tests class number_sets
-*/
-
 #include "number_sets.h"
 
 #include <assert.h>
@@ -9,6 +5,12 @@
 #include <fstream>
 
 using namespace std;
+
+
+/*
+	tests class number_sets
+*/
+
 
 void process_input_file()
 {
