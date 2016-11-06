@@ -1,9 +1,10 @@
 #pragma once
 
-#include <algorithm> 
-#include <functional> 
 #include <cctype>
 #include <locale>
+#include <vector>
+#include <algorithm> 
+#include <functional> 
 
 
 /*
@@ -12,9 +13,13 @@
 	Important Functions:
 		* trim: trims whitespace from left and right for a string
 		* convertTo: converts a string to a given data type
+		* hash_value: generates hash value for a container
+		* printer: helper for printing in mixed char type environment
 */
 
-
+/* 
+	trim
+*/
 
 // source: http://stackoverflow.com/a/217605/2790081
 
@@ -40,6 +45,9 @@ std::basic_string<CharT>& trim(std::basic_string<CharT> &s)
 	return ltrim(rtrim(s));
 }
 
+/*
+	convertTo
+*/
 
 // source: https://isocpp.org/wiki/faq/misc-technical-issues#convert-string-to-any
 
@@ -63,3 +71,68 @@ inline T convertTo(const std::basic_string<CharT>& s, bool failIfLeftoverChars =
 	convert(s, x, failIfLeftoverChars);
 	return x;
 }
+
+
+/*
+	hash_value
+*/
+
+// source: boost
+
+template <typename SizeT>
+inline void hash_combine_impl(SizeT& seed, SizeT value)
+{
+	seed ^= value + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+template <class T>
+inline void hash_combine(std::size_t& seed, T const& v)
+{
+	std::hash<T> hasher;
+	return hash_combine_impl(seed, hasher(v));
+}
+
+template <class It>
+inline std::size_t hash_range(It first, It last)
+{
+	std::size_t seed = 0;
+
+	for (; first != last; ++first)
+	{
+		hash_combine(seed, *first);
+	}
+
+	return seed;
+}
+
+template <class T, class A>
+std::size_t hash_value(std::vector<T, A> const& v)
+{
+	return hash_range(v.begin(), v.end());
+}
+
+/*
+	printer
+*/
+
+template<typename CharT>
+struct printer
+{
+	template<typename T>
+	printer& operator<<(const T& t)
+	{
+		// do nothing
+		return *this;
+	}
+};
+
+template<>
+struct printer<char>
+{
+	template<typename T>
+	printer& operator<<(const T& t)
+	{
+		cout << t;
+		return *this;
+	}
+};

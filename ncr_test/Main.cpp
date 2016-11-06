@@ -110,12 +110,6 @@ vector<basic_string<wchar_t>> get_test_vector_string()
 	return vector<basic_string<wchar_t>>{L"123, 456, 789", L"123, 456, 789"};
 }
 
-template<>
-vector<basic_string<char16_t>> get_test_vector_string()
-{
-	return vector<basic_string<char16_t>>{u"123, 456, 789", u"123, 456, 789"};
-}
-
 template<typename CharT>
 void test_different_char_types_typed()
 {

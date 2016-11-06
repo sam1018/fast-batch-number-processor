@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <unordered_set>
 
 /*
 	File: number_sets.h
@@ -30,18 +31,17 @@ class number_sets
 public:
 	using string_type = std::basic_string<CharT>;
 	using invalid_inputs_type = std::vector<string_type>;
-
-private:
 	using stringstream_type = std::basic_stringstream<CharT>;
 
 private:
 	template<typename T>
 	struct number_set
 	{
+		int occurances;
 		std::vector<T> numbers;
 	};
 
-	std::vector<number_set<T>> valid_inputs;
+	std::unordered_set<number_set<T>> valid_inputs;
 	invalid_inputs_type invalid_inputs;
 
 public:
@@ -93,6 +93,12 @@ bool number_sets<T, CharT>::add(const string_type& input)
 
 	if(add_failed)
 		invalid_inputs.push_back(input);
+	else
+	{
+		sort(in.numbers.begin(), in.numbers.end());
+		auto hash_key = hash_value(in.numbers);
+		printer<CharT>() << hash_key << "\t" << input << "\n";
+	}
 
 	return !add_failed;
 }
