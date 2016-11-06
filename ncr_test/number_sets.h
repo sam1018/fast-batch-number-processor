@@ -18,11 +18,11 @@
 		* The question mentions integer type... by making type as template, we allow ourselves the flexibility of having signed, unsigned, long long etc.
 		* Only integral type is allowed... ensured by using static_assert
 	*Non copyable*
-		* Due to one pointer member, we need to take care of copy-ability
+		* Due to one pointer member - most_frequent, we need to take care of copy-ability
 		* Making class non-copyable, as not required by the question
 	*Container type:
 		* Using unordered_set, STL implementation for hash table... hash value is calculated based on the numbers in a set
-		* Sorted vector is used to hold the numbers in a set, as the order of numbers alter hash value... also sets will be compared for euqlity by unordered_set
+		* Sorted vector is used to hold the numbers in a set, as the order of numbers alter hash value... also sets may be compared for euqlity by unordered_set
 */
 
 template<typename T>
