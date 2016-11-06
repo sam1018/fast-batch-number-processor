@@ -235,6 +235,10 @@ void test_duplicates()
 
 		d.add(ss.str());
 	}
+
+	d.add("2, 3, 4");
+
+	assert(d.get_duplicate_count() == 103 && d.get_non_duplicate_count() == 1);
 }
 
 void test_non_copyable()
