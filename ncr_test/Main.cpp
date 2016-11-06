@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include <map>
 #include <random>
 #include <fstream>
 #include <unordered_map>
@@ -13,6 +14,55 @@ using namespace std;
 	tests class number_sets
 */
 
+// a lame version of checking duplicate number sets
+// for cross checking
+vector<number_set<int>> simple_number_sets_impl()
+{
+	ifstream infile("input.txt");
+	string line;
+	vector<int> numbers;
+	map<vector<int>, int> all_sets;
+
+	while (getline(infile, line))
+	{
+		numbers.clear();
+		try
+		{
+			string token;
+			auto ss = stringstream(line);
+			while (std::getline(ss, token, ','))
+			{
+				numbers.push_back(convertTo<int>(token));
+			}
+
+			sort(numbers.begin(), numbers.end());
+
+			if (all_sets.find(numbers) == all_sets.end())
+				all_sets[numbers] = 1;
+			else
+				all_sets[numbers]++;
+		}
+		catch (...)
+		{
+		}
+	}
+
+	vector<number_set<int>> res;
+
+	for (auto x : all_sets)
+		res.push_back(number_set<int>{ x.first, x.second });
+
+	sort(res.begin(), res.end(), [](const auto& a, const auto& b) {
+		if (a.occurences == b.occurences)
+			if (a.numbers.size() == b.numbers.size())
+				return a.numbers[0] > b.numbers[0];
+			else
+				return a.numbers.size() > b.numbers.size();
+		return a.occurences > b.occurences;
+	});
+
+	return res;
+}
 
 void process_input_file()
 {
@@ -63,6 +113,41 @@ void process_input_file()
 	}
 
 	cout << "Total: " << count << "\n";
+}
+
+void test_input_file_result()
+{
+	number_sets<int> x;
+
+	ifstream infile("input.txt");
+
+	string line;
+	while (getline(infile, line))
+	{
+		try
+		{
+			x.add(line);
+		}
+		catch (exception&)
+		{
+		}
+	}
+
+	vector<number_set<int>> sets;
+
+	for (auto item : x.get_data())
+		sets.push_back(number_set<int>{item.numbers, item.occurences});
+
+	sort(sets.begin(), sets.end(), [](const auto& a, const auto& b) {
+		if (a.occurences == b.occurences)
+			if (a.numbers.size() == b.numbers.size())
+				return a.numbers[0] > b.numbers[0];
+			else
+				return a.numbers.size() > b.numbers.size();
+		return a.occurences > b.occurences;
+	});
+
+	assert(sets == simple_number_sets_impl());
 }
 
 void test_invalid_inputs()
@@ -226,7 +311,7 @@ void test_duplicates()
 
 		stringstream ss;
 
-		for (int i = 0; i < vi.size(); ++i)
+		for (size_t i = 0; i < vi.size(); ++i)
 		{
 			if (i != 0)
 				ss << ", ";
@@ -259,6 +344,9 @@ int main()
 	process_input_file();
 
 	cout << "\nPerforming Tests (Will assert on fail)...\n";
+
+	test_input_file_result();
+
 	test_invalid_inputs();
 
 	test_different_integral_types();

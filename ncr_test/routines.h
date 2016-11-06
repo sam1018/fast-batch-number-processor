@@ -12,72 +12,15 @@
 	File: routines.h
 	Description: A header only file for various helper functions
 	Important Functions:
-		* trim: trims whitespace from left and right for a string
-		* convertTo: converts a string to a given data type
 		* hash_value: generates hash value for a container
-		* printer: helper for printing in mixed char type environment
-		* operator << overload for vector
+		* convertTo: converts a string to a given data type
 		* noncopyable class
+		* trim: trims whitespace from left and right for a string
+		* operator << overload for vector
 */
-
-/* 
-	trim
-*/
-
-// source: http://stackoverflow.com/a/217605/2790081
-
-template<typename CharT>
-std::basic_string<CharT>& ltrim(std::basic_string<CharT> &s)
-{
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-		std::not1(std::ptr_fun<int, int>(std::isspace))));
-	return s;
-}
-
-template<typename CharT>
-std::basic_string<CharT>& rtrim(std::basic_string<CharT> &s)
-{
-	s.erase(std::find_if(s.rbegin(), s.rend(),
-		std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-	return s;
-}
-
-template<typename CharT>
-std::basic_string<CharT>& trim(std::basic_string<CharT> &s)
-{
-	return ltrim(rtrim(s));
-}
 
 /*
-	convertTo
-*/
-
-// source: https://isocpp.org/wiki/faq/misc-technical-issues#convert-string-to-any
-
-template<typename T, typename CharT>
-inline void convert(std::basic_string<CharT> s, T& x, bool failIfLeftoverChars = true)
-{
-	trim(s);
-	if(s[0] == '-' && std::is_unsigned<T>::value)
-		throw std::runtime_error("Conversion Failed");
-
-	std::basic_istringstream<CharT> i(s);
-	CharT c;
-	if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
-		throw std::runtime_error("Conversion Failed");
-}
-
-template<typename T, typename CharT>
-inline T convertTo(const std::basic_string<CharT>& s, bool failIfLeftoverChars = true)
-{
-	T x;
-	convert(s, x, failIfLeftoverChars);
-	return x;
-}
-
-
-/*
-	hash_value
+hash_value
 */
 
 // source: boost
@@ -115,30 +58,77 @@ std::size_t hash_value(std::vector<T, A> const& v)
 }
 
 /*
-	printer
+convertTo
+*/
+
+// source: https://isocpp.org/wiki/faq/misc-technical-issues#convert-string-to-any
+
+template<typename T, typename CharT>
+inline void convert(std::basic_string<CharT> s, T& x, bool failIfLeftoverChars = true)
+{
+	trim(s);
+	if (s[0] == '-' && std::is_unsigned<T>::value)
+		throw std::runtime_error("Conversion Failed");
+
+	std::basic_istringstream<CharT> i(s);
+	CharT c;
+	if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
+		throw std::runtime_error("Conversion Failed");
+}
+
+template<typename T, typename CharT>
+inline T convertTo(const std::basic_string<CharT>& s, bool failIfLeftoverChars = true)
+{
+	T x;
+	convert(s, x, failIfLeftoverChars);
+	return x;
+}
+
+
+/*
+class noncopyable
+*/
+
+// Source: boost
+
+class noncopyable
+{
+protected:
+	noncopyable() = default;
+	~noncopyable() = default;
+
+	noncopyable(const noncopyable&) = delete;
+	noncopyable& operator=(const noncopyable&) = delete;
+};
+
+
+
+
+/* 
+	trim
 */
 
 template<typename CharT>
-struct printer
+std::basic_string<CharT>& ltrim(std::basic_string<CharT> &s)
 {
-	template<typename T>
-	printer& operator<<(const T& t)
-	{
-		// do nothing
-		return *this;
-	}
-};
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+		std::not1(std::ptr_fun<int, int>(std::isspace))));
+	return s;
+}
 
-template<>
-struct printer<char>
+template<typename CharT>
+std::basic_string<CharT>& rtrim(std::basic_string<CharT> &s)
 {
-	template<typename T>
-	printer& operator<<(const T& t)
-	{
-		cout << t;
-		return *this;
-	}
-};
+	s.erase(std::find_if(s.rbegin(), s.rend(),
+		std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+template<typename CharT>
+std::basic_string<CharT>& trim(std::basic_string<CharT> &s)
+{
+	return ltrim(rtrim(s));
+}
 
 /*
 	operator << overload for vector
@@ -155,19 +145,3 @@ std::ostream& operator<< (std::ostream& out, const std::vector<T>& v)
 	}
 	return out;
 }
-
-/*
-	class noncopyable
-*/
-
-// Source: boost
-
-class noncopyable
-{
-protected:
-	noncopyable() = default;
-	~noncopyable() = default;
-
-	noncopyable(const noncopyable&) = delete;
-	noncopyable& operator=(const noncopyable&) = delete;
-};
