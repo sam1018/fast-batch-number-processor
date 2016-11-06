@@ -9,6 +9,9 @@
 /*
 	File: routines.h
 	Description: A header only file for various helper functions
+	Important Functions:
+		* trim: trims whitespace from left and right for a string
+		* convertTo: converts a string to a given data type
 */
 
 
