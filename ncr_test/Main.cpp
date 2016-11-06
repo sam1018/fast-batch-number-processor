@@ -2,7 +2,9 @@
 
 #include <assert.h>
 
+#include <random>
 #include <fstream>
+#include <unordered_map>
 
 using namespace std;
 
@@ -21,11 +23,46 @@ void process_input_file()
 	string line;
 	while (getline(infile, line))
 	{
-		if (!x.add(line))
-			cout << "Invalid input: " << line << "\n";
+		try
+		{
+			x.add(line);
+		}
+		catch (exception& e)
+		{
+			cout << e.what() << ": " << line << "\n";
+		}
 	}
 
+	auto most_frequent = x.get_most_frequent_data();
 
+	cout << "\nMost frequent: Occurence " << most_frequent->occurences << "\nData: ";
+
+	for (auto x : most_frequent->numbers)
+		cout << x << " ";
+
+	cout << "\n";
+
+	cout << "Duplicates: " << x.get_duplicate_count() << " Non Duplicates: " << x.get_non_duplicate_count() << "\n";
+
+	vector<number_set<int>> sets;
+
+	for (auto item : x.get_data())
+		sets.push_back(number_set<int>{item.numbers, item.occurences});
+
+	sort(sets.begin(), sets.end(), [](const auto& a, const auto& b) {
+		return a.occurences > b.occurences;
+	});
+
+	cout << "\n";
+	cout << "Occurences\tNumber Set\n";
+	int count = 0;
+	for (auto item : sets)
+	{
+		count += item.occurences;
+		cout << item.occurences << "\t\t" << item.numbers << "\n";
+	}
+
+	cout << "Total: " << count << "\n";
 }
 
 void test_invalid_inputs()
@@ -54,10 +91,28 @@ void test_invalid_inputs()
 	};
 
 	for (size_t i = 0; i < valid_inputs.size(); ++i)
-		assert(x.add(valid_inputs[i]) == true);
+	{
+		try
+		{
+			x.add(valid_inputs[i]);
+		}
+		catch (...)
+		{
+			assert(false); // add should be successful... shouldn't throw...
+		}
+	}
 
 	for (size_t i = 0; i < invalid_inputs.size(); ++i)
-		assert(x.add(invalid_inputs[i]) == false);
+	{
+		try
+		{
+			x.add(invalid_inputs[i]);
+			assert(false); // shouldn't succeed
+		}
+		catch (...)
+		{
+		}
+	}
 
 	assert(x.get_invalid_inputs() == invalid_inputs);
 }
@@ -80,12 +135,20 @@ void test_different_integral_types()
 	number_sets<long long int> lld;
 	number_sets<unsigned long long int> ulld;
 
+	auto f = [](auto& set, auto& input) {
+		try
+		{
+			set.add(input);
+		}
+		catch (...) {}
+	};
+
 	for (size_t i = 0; i < inputs.size(); ++i)
 	{
-		d.add(inputs[i]);
-		ud.add(inputs[i]);
-		lld.add(inputs[i]);
-		ulld.add(inputs[i]);
+		f(d, inputs[i]);
+		f(ud, inputs[i]);
+		f(lld, inputs[i]);
+		f(ulld, inputs[i]);
 	}
 
 	assert(d.get_invalid_inputs()		== vector<string>({ to_string(UINT_MAX), to_string(_I64_MAX), to_string(_I64_MIN), to_string(_UI64_MAX), "123.456" }));
@@ -117,8 +180,17 @@ void test_different_char_types_typed()
 
 	vector<basic_string<CharT>> inputs = {  };
 
-	for(auto s : get_test_vector_string<CharT>())
-		assert(d.add(s) == true);
+	for (auto s : get_test_vector_string<CharT>())
+	{
+		try
+		{
+			d.add(s);
+		}
+		catch (...)
+		{
+			assert(false); // shouldn't throw
+		}
+	}
 }
 
 void test_different_char_types()
@@ -127,13 +199,57 @@ void test_different_char_types()
 	test_different_char_types_typed<wchar_t>();
 }
 
+void test_duplicates()
+{
+	number_sets<int> d;
+
+	d.add("1");
+	assert(d.get_duplicate_count() == 0 && d.get_non_duplicate_count() == 1);
+
+	d.add("1");
+	assert(d.get_duplicate_count() == 2 && d.get_non_duplicate_count() == 0);
+
+	d.add("1");
+	assert(d.get_duplicate_count() == 3 && d.get_non_duplicate_count() == 0);
+
+	vector<int> vi;
+
+	for (int i = 0; i < 100; ++i)
+		vi.push_back(rand());
+
+	for (int i = 0; i < 100; ++i)
+	{
+		std::random_device rd;
+		std::mt19937 g(rd());
+
+		std::shuffle(vi.begin(), vi.end(), g);
+
+		stringstream ss;
+
+		for (int i = 0; i < vi.size(); ++i)
+		{
+			if (i != 0)
+				ss << ", ";
+			ss << vi[i];
+		}
+
+		d.add(ss.str());
+	}
+}
+
 int main()
 {
+	cout << "Input file results:\n";
 	process_input_file();
 
+	cout << "\nPerforming Tests (Will assert on fail)...\n";
 	test_invalid_inputs();
 
 	test_different_integral_types();
 
 	test_different_char_types();
+
+	test_duplicates();
+
+	cout << "Successfully ran all tests.\n";
 }

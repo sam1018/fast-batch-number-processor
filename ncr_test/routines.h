@@ -3,6 +3,7 @@
 #include <cctype>
 #include <locale>
 #include <vector>
+#include <iterator>
 #include <algorithm> 
 #include <functional> 
 
@@ -15,6 +16,7 @@
 		* convertTo: converts a string to a given data type
 		* hash_value: generates hash value for a container
 		* printer: helper for printing in mixed char type environment
+		* operator << overload for vector
 */
 
 /* 
@@ -136,3 +138,15 @@ struct printer<char>
 		return *this;
 	}
 };
+
+template <typename T>
+std::ostream& operator<< (std::ostream& out, const std::vector<T>& v)
+{
+	if (!v.empty())
+	{
+		out << '[';
+		std::copy(v.begin(), v.end(), std::ostream_iterator<T>(out, ", "));
+		out << "\b\b]";
+	}
+	return out;
+}
