@@ -140,6 +140,10 @@ struct printer<char>
 	}
 };
 
+/*
+	operator << overload for vector
+*/
+
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const std::vector<T>& v)
 {
