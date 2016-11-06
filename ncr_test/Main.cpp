@@ -237,6 +237,18 @@ void test_duplicates()
 	}
 }
 
+void test_non_copyable()
+{
+	// following code should fail to compile due to being non copyable
+	//number_sets<int> a;
+
+	//number_sets<int> b(a);
+
+	//number_sets<int> c;
+
+	//c = a;
+}
+
 int main()
 {
 	cout << "Input file results:\n";
@@ -250,6 +262,8 @@ int main()
 	test_different_char_types();
 
 	test_duplicates();
+
+	test_non_copyable();
 
 	cout << "Successfully ran all tests.\n";
 }

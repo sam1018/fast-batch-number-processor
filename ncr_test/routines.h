@@ -17,6 +17,7 @@
 		* hash_value: generates hash value for a container
 		* printer: helper for printing in mixed char type environment
 		* operator << overload for vector
+		* noncopyable class
 */
 
 /* 
@@ -150,3 +151,19 @@ std::ostream& operator<< (std::ostream& out, const std::vector<T>& v)
 	}
 	return out;
 }
+
+/*
+	class noncopyable
+*/
+
+// Source: boost
+
+class noncopyable
+{
+protected:
+	noncopyable() = default;
+	~noncopyable() = default;
+
+	noncopyable(const noncopyable&) = delete;
+	noncopyable& operator=(const noncopyable&) = delete;
+};

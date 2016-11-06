@@ -17,7 +17,12 @@
 	*Data type templatized*
 		* The question mentions integer type... by making type as template, we allow ourselves the flexibility of having signed, unsigned, long long etc.
 		* Only integral type is allowed... ensured by using static_assert
-	*Container is sorted vector*: We don't need original number sequence... so to make comparison more efficient, we need either sorted vector or multiset... picking vector, as that is more memory friendly
+	*Non copyable*
+		* Due to one pointer member, we need to take care of copy-ability
+		* Making class non-copyable, as not required by the question
+	*Container type:
+		* Using unordered_set, STL implementation for hash table... hash value is calculated based on the numbers in a set
+		* Sorted vector is used to hold the numbers in a set, as the order of numbers alter hash value... also sets will be compared for euqlity by unordered_set
 */
 
 template<typename T>
@@ -58,7 +63,7 @@ bool operator==(const number_set<T>& lhs, const number_set<T>& rhs)
 */
 
 template<typename T, typename CharT = char>
-class number_sets
+class number_sets : private noncopyable
 {
 public:
 	// type definitions
