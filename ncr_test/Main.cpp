@@ -57,14 +57,10 @@ void test_invalid_inputs()
 	for (size_t i = 0; i < invalid_inputs.size(); ++i)
 		assert(x.add(invalid_inputs[i]) == false);
 
-	auto res = x.get_invalid_inputs();
-	assert(invalid_inputs.size() == res.size());
-
-	for (size_t i = 0; i < invalid_inputs.size(); ++i)
-		assert(invalid_inputs[i] == res[i]);
+	assert(x.get_invalid_inputs() == invalid_inputs);
 }
 
-void test_different_types()
+void test_different_integral_types()
 {
 	vector<string> inputs = {
 		to_string(0),
@@ -73,7 +69,8 @@ void test_different_types()
 		to_string(UINT_MAX),
 		to_string(_I64_MAX),
 		to_string(_I64_MIN),
-		to_string(_UI64_MAX)
+		to_string(_UI64_MAX),
+		"123.456"
 	};
 
 	number_sets<int> d;
@@ -89,20 +86,49 @@ void test_different_types()
 		ulld.add(inputs[i]);
 	}
 
-	auto compare = [](auto& v1, auto& v2) {
-		assert(v1.size() == v2.size());
+	assert(d.get_invalid_inputs()		== vector<string>({ to_string(UINT_MAX), to_string(_I64_MAX), to_string(_I64_MIN), to_string(_UI64_MAX), "123.456" }));
+	assert(ud.get_invalid_inputs()		== vector<string>({ to_string(INT_MIN), to_string(_I64_MAX), to_string(_I64_MIN), to_string(_UI64_MAX), "123.456" }));
+	assert(lld.get_invalid_inputs()		== vector<string>({ to_string(_UI64_MAX), "123.456" }));
+	assert(ulld.get_invalid_inputs()	== vector<string>({ to_string(INT_MIN), to_string(_I64_MIN), "123.456" }));
 
-		for (size_t i = 0; i < v1.size(); ++i)
-			assert(v1[i] == v2[i]);
-	};
-
-	compare(d.get_invalid_inputs(), vector<string>({ to_string(UINT_MAX), to_string(_I64_MAX), to_string(_I64_MIN), to_string(_UI64_MAX) }));
-	compare(ud.get_invalid_inputs(), vector<string>({ to_string(INT_MIN), to_string(_I64_MAX), to_string(_I64_MIN), to_string(_UI64_MAX) }));
-	compare(lld.get_invalid_inputs(), vector<string>({ to_string(_UI64_MAX) }));
-	compare(ulld.get_invalid_inputs(), vector<string>({ to_string(INT_MIN), to_string(_I64_MIN) }));
-
+	// following should static_assert
 	//number_sets<float> f; // should give static_assert, float is not an integral type
 	//number_sets<string> s; // should give static_assert, string is not an integral type
+}
+
+template<typename CharT>
+vector<basic_string<CharT>> get_test_vector_string()
+{
+	return vector<basic_string<CharT>>{"123, 456, 789", "123, 456, 789"};
+}
+
+template<>
+vector<basic_string<wchar_t>> get_test_vector_string()
+{
+	return vector<basic_string<wchar_t>>{L"123, 456, 789", L"123, 456, 789"};
+}
+
+template<>
+vector<basic_string<char16_t>> get_test_vector_string()
+{
+	return vector<basic_string<char16_t>>{u"123, 456, 789", u"123, 456, 789"};
+}
+
+template<typename CharT>
+void test_different_char_types_typed()
+{
+	number_sets<int, CharT> d;
+
+	vector<basic_string<CharT>> inputs = {  };
+
+	for(auto s : get_test_vector_string<CharT>())
+		assert(d.add(s) == true);
+}
+
+void test_different_char_types()
+{
+	test_different_char_types_typed<char>();
+	test_different_char_types_typed<wchar_t>();
 }
 
 int main()
@@ -111,5 +137,7 @@ int main()
 
 	test_invalid_inputs();
 
-	test_different_types();
+	test_different_integral_types();
+
+	test_different_char_types();
 }

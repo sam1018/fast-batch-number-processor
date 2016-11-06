@@ -5,25 +5,34 @@
 #include <cctype>
 #include <locale>
 
+
+/*
+	File: routines.h
+	Description: A header only file for various helper functions
+*/
+
+
+
 // source: http://stackoverflow.com/a/217605/2790081
 
-std::string& ltrim(std::string &s)
+template<typename CharT>
+std::basic_string<CharT>& ltrim(std::basic_string<CharT> &s)
 {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
 		std::not1(std::ptr_fun<int, int>(std::isspace))));
 	return s;
 }
 
-// trim from end
-std::string& rtrim(std::string &s)
+template<typename CharT>
+std::basic_string<CharT>& rtrim(std::basic_string<CharT> &s)
 {
 	s.erase(std::find_if(s.rbegin(), s.rend(),
 		std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
 	return s;
 }
 
-// trim from both ends
-std::string& trim(std::string &s)
+template<typename CharT>
+std::basic_string<CharT>& trim(std::basic_string<CharT> &s)
 {
 	return ltrim(rtrim(s));
 }
@@ -31,31 +40,21 @@ std::string& trim(std::string &s)
 
 // source: https://isocpp.org/wiki/faq/misc-technical-issues#convert-string-to-any
 
-class BadConversion : public std::runtime_error
+template<typename T, typename CharT>
+inline void convert(std::basic_string<CharT> s, T& x, bool failIfLeftoverChars = true)
 {
-public:
-	BadConversion(const std::string& s)
-		: std::runtime_error(s)
-	{ }
-};
-
-template<typename T>
-inline void convert(const std::string& _s, T& x, bool failIfLeftoverChars = true)
-{
-	string s = _s;
-
 	trim(s);
 	if(s[0] == '-' && std::is_unsigned<T>::value)
-		throw BadConversion(s);
+		throw std::runtime_error("Conversion Failed");
 
-	std::istringstream i(s);
-	char c;
+	std::basic_istringstream<CharT> i(s);
+	CharT c;
 	if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
-		throw BadConversion(s);
+		throw std::runtime_error("Conversion Failed");
 }
 
-template<typename T>
-inline T convertTo(const std::string& s, bool failIfLeftoverChars = true)
+template<typename T, typename CharT>
+inline T convertTo(const std::basic_string<CharT>& s, bool failIfLeftoverChars = true)
 {
 	T x;
 	convert(s, x, failIfLeftoverChars);

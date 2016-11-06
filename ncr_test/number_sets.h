@@ -8,8 +8,10 @@
 #include <iostream>
 #include <algorithm>
 
-
 /*
+	File: number_sets.h
+	Description: header only class number_sets
+
 	Design Decisions:
 	*Data type templatized*
 		* The question mentions integer type... by making type as template, we allow ourselves the flexibility of having signed, unsigned, long long etc.
@@ -17,11 +19,16 @@
 	*Container is sorted vector*: We don't need original number sequence... so to make comparison more efficient, we need either sorted vector or multiset... picking vector, as that is more memory friendly
 */
 
-template<typename T>
+
+template<typename T, typename CharT = char>
 class number_sets
 {
 public:
-	using invalid_inputs_type = std::vector<std::string>;
+	using string_type = std::basic_string<CharT>;
+	using invalid_inputs_type = std::vector<string_type>;
+
+private:
+	using stringstream_type = std::basic_stringstream<CharT>;
 
 private:
 	template<typename T>
@@ -38,7 +45,7 @@ public:
 
 	// returns false if failed to insert input
 	// true otherwise
-	bool add(const std::string& input);
+	bool add(const string_type& input);
 
 	invalid_inputs_type& get_invalid_inputs();
 };
@@ -48,29 +55,29 @@ public:
  *	implementation for class number_sets
 **/
 
-template<typename T>
-number_sets<T>::number_sets()
+template<typename T, typename CharT>
+number_sets<T, CharT>::number_sets()
 {
 	static_assert(std::is_integral<T>::value, "Integral type required.");
 }
 
-template<typename T>
-bool number_sets<T>::add(const std::string& input)
+template<typename T, typename CharT>
+bool number_sets<T, CharT>::add(const string_type& input)
 {
 	bool add_failed = false;
 
-	std::stringstream ss(input);
-	std::string token;
+	stringstream_type ss(input);
+	string_type token;
 	number_set<T> in;
 
 	// splitting input based on comma
-	while (std::getline(ss, token, ','))
+	while (std::getline(ss, token, CharT(',')))
 	{
 		try
 		{
 			in.numbers.push_back(convertTo<T>(token));
 		}
-		catch (BadConversion&)
+		catch (std::runtime_error&)
 		{
 			add_failed = true;
 			break;
@@ -86,8 +93,8 @@ bool number_sets<T>::add(const std::string& input)
 	return !add_failed;
 }
 
-template<typename T>
-typename number_sets<T>::invalid_inputs_type& number_sets<T>::get_invalid_inputs()
+template<typename T, typename CharT>
+typename number_sets<T, CharT>::invalid_inputs_type& number_sets<T, CharT>::get_invalid_inputs()
 {
 	return invalid_inputs;
 }
