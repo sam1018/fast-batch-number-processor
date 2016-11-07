@@ -21,8 +21,9 @@
 		* Due to one pointer member - most_frequent, we need to take care of copy-ability
 		* Making class non-copyable, as not required by the question
 	*Container type:
-		* Using unordered_set, STL implementation for hash table... hash value is calculated based on the numbers in a set
-		* Sorted vector is used to hold the numbers in a set, as the order of numbers alter hash value... also sets may be compared for euqlity by unordered_set
+		* *All number sets container is unordered_set*: Using unordered_set, STL implementation for hash table... hash value is calculated based on the numbers in a set
+		* *Individual number set container is sorted vector*: Sorted vector is used to hold the numbers in a set... 
+			sorting is required because, the order of numbers alter hash value... also sets may be compared for euqlity by unordered_set
 */
 
 template<typename T>
