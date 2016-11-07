@@ -1,6 +1,7 @@
 #pragma once
 
 #include "routines.h"
+#include "parse_ints_fast.h"
 
 #include <string>
 #include <vector>
@@ -67,7 +68,6 @@ class number_sets : private noncopyable
 public:
 	// type definitions
 	using string_type = std::basic_string<CharT>;
-	using stringstream_type = std::basic_stringstream<CharT>;
 	using data_container_type = std::unordered_set<number_set<T>, hasher<T>>;
 	using const_ref_data_container_type = const std::unordered_set<number_set<T>, hasher<T>>&;
 	using invalid_inputs_type = std::vector<std::basic_string<CharT>>;
@@ -151,26 +151,40 @@ const number_set<T>* number_sets<T, CharT>::get_most_frequent_data() const
 }
 
 template<typename T, typename CharT>
-std::vector<T> number_sets<T, CharT>::get_sorted_number_set(const string_type& input)
+std::vector<T> get_numbers(const std::basic_string<CharT>& input)
 {
-	bool add_failed = false;
-
-	stringstream_type ss(input);
-	string_type token;
 	std::vector<T> numbers;
+
+	std::basic_stringstream<CharT> ss(input);
+	std::basic_string<CharT> token;
 
 	// splitting input based on comma
 	while (std::getline(ss, token, CharT(',')))
+		numbers.push_back(convertTo<T>(token));
+
+	return numbers;
+}
+
+template<>
+std::vector<int> get_numbers<int, char>(const std::string& input)
+{
+	parse_ints_fast parser;
+	return parser.get_values(input);
+}
+
+template<typename T, typename CharT>
+std::vector<T> number_sets<T, CharT>::get_sorted_number_set(const string_type& input)
+{
+	std::vector<T> numbers;
+	bool add_failed = false;
+
+	try
 	{
-		try
-		{
-			numbers.push_back(convertTo<T>(token));
-		}
-		catch (std::runtime_error&)
-		{
-			add_failed = true;
-			break;
-		}
+		numbers = get_numbers<T, CharT>(input);
+	}
+	catch (std::runtime_error&)
+	{
+		add_failed = true;
 	}
 
 	if (numbers.empty())

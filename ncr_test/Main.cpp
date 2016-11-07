@@ -172,7 +172,8 @@ void test_invalid_inputs()
 		"123,,123",
 		"123 123",
 		"123.456",
-		"1,2,3,4s,6"
+		"1,2,3,4s,6",
+		"123,456,12-456"
 	};
 
 	for (size_t i = 0; i < valid_inputs.size(); ++i)

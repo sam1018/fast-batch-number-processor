@@ -150,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="number_sets.h" />
+    <ClInclude Include="parse_ints_fast.h" />
     <ClInclude Include="routines.h" />
   </ItemGroup>
   <ItemGroup>
