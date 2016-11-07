@@ -45,9 +45,7 @@ struct number_set
 template<typename T>
 struct hasher
 {
-	using argument_type = number_set<T>;
-	using result_type = std::size_t;
-	result_type operator()(argument_type const& s) const
+	std::size_t operator()(number_set<T> const& s) const
 	{
 		return hash_value(s.numbers);
 	}
