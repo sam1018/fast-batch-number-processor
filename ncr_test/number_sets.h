@@ -70,12 +70,13 @@ public:
 	using stringstream_type = std::basic_stringstream<CharT>;
 	using data_container_type = std::unordered_set<number_set<T>, hasher<T>>;
 	using const_ref_data_container_type = const std::unordered_set<number_set<T>, hasher<T>>&;
+	using invalid_inputs_type = std::vector<std::basic_string<CharT>>;
 	using const_ref_invalid_inputs_type = const std::vector<std::basic_string<CharT>>&;
 
 private:
 	// variables
 	data_container_type data;
-	std::vector<string_type> invalid_inputs;
+	invalid_inputs_type invalid_inputs;
 	const number_set<T>* most_frequent;
 	int duplicate_count;
 	int non_duplicate_count;
