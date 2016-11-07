@@ -98,7 +98,7 @@ public:
 	const_ref_data_container_type get_data() const;
 
 private:
-	std::vector<T> parse_numbers(const string_type& input);
+	std::vector<T> get_sorted_number_set(const string_type& input);
 };
 
 
@@ -118,11 +118,7 @@ number_sets<T, CharT>::number_sets() :
 template<typename T, typename CharT>
 bool number_sets<T, CharT>::add(const string_type& input)
 {
-	auto numbers = parse_numbers(input);
-
-	sort(numbers.begin(), numbers.end());
-
-	auto res = data.emplace(numbers);
+	auto res = data.emplace(get_sorted_number_set(input));
 	if (!res.second)
 		res.first->occurences++;
 
@@ -155,7 +151,7 @@ const number_set<T>* number_sets<T, CharT>::get_most_frequent_data() const
 }
 
 template<typename T, typename CharT>
-std::vector<T> number_sets<T, CharT>::parse_numbers(const string_type& input)
+std::vector<T> number_sets<T, CharT>::get_sorted_number_set(const string_type& input)
 {
 	bool add_failed = false;
 
@@ -185,6 +181,8 @@ std::vector<T> number_sets<T, CharT>::parse_numbers(const string_type& input)
 		invalid_inputs.push_back(input);
 		throw std::runtime_error("Invalid input");
 	}
+
+	sort(numbers.begin(), numbers.end());
 
 	return numbers;
 }
