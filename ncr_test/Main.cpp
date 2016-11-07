@@ -289,13 +289,13 @@ void test_duplicates()
 {
 	number_sets<int> d;
 
-	d.add("1");
+	assert(d.add("1") == true);
 	assert(d.get_duplicate_count() == 0 && d.get_non_duplicate_count() == 1);
 
-	d.add("1");
+	assert(d.add("1") == false);
 	assert(d.get_duplicate_count() == 2 && d.get_non_duplicate_count() == 0);
 
-	d.add("1");
+	assert(d.add("1") == false);
 	assert(d.get_duplicate_count() == 3 && d.get_non_duplicate_count() == 0);
 
 	vector<int> vi;
@@ -325,6 +325,7 @@ void test_duplicates()
 	d.add("2, 3, 4");
 
 	assert(d.get_duplicate_count() == 103 && d.get_non_duplicate_count() == 1);
+	assert(d.get_most_frequent_data()->occurences == 100);
 }
 
 void test_non_copyable()

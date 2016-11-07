@@ -87,7 +87,7 @@ public:
 
 	// modifiers
 
-	// returns true for duplicate... false otherwise
+	// returns false for duplicate... true otherwise
 	bool add(const string_type& input);
 
 	// getters
@@ -135,7 +135,7 @@ bool number_sets<T, CharT>::add(const string_type& input)
 	else
 		duplicate_count++;
 
-	return res.first->occurences > 1;
+	return res.first->occurences == 1;
 }
 
 template<typename T, typename CharT>
@@ -150,6 +150,7 @@ const number_set<T>* number_sets<T, CharT>::get_most_frequent_data() const
 	return most_frequent;
 }
 
+// default parsing using C++ stringstream
 template<typename T, typename CharT>
 std::vector<T> get_numbers(const std::basic_string<CharT>& input)
 {
@@ -165,6 +166,7 @@ std::vector<T> get_numbers(const std::basic_string<CharT>& input)
 	return numbers;
 }
 
+// fast parsing, for int output and char input
 template<>
 std::vector<int> get_numbers<int, char>(const std::string& input)
 {
