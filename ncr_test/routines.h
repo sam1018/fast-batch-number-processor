@@ -86,10 +86,8 @@ inline T convertTo(const std::basic_string<CharT>& s, bool failIfLeftoverChars =
 
 
 /*
-class noncopyable
+	class noncopyable
 */
-
-// Source: boost
 
 class noncopyable
 {
