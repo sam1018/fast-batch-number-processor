@@ -3,8 +3,12 @@
 #include <string>
 #include <vector>
 
-// a fast int parser
-// for now, only int output and char input is accepted
+/*
+	File: parse_ints_fast.h
+	Description: header only class parse_ints_fast
+	A fast implementation for parsing ints from a comma separated string of ints
+	With support for error detection
+*/
 
 class parse_ints_fast
 {
