@@ -2,12 +2,15 @@
 
 #include "routines.h"
 #include "parse_ints_fast.h"
+#include "number_sets_data.h"
+#include "add_number_sets_parallel.h"
 
 #include <string>
 #include <vector>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <type_traits>
 #include <unordered_set>
 
 /*
@@ -27,36 +30,7 @@
 			sorting is required because, the order of numbers alter hash value... also sets may be compared for euqlity by unordered_set
 */
 
-template<typename T>
-struct number_set
-{
-	std::vector<T> numbers;
 
-	// unordered_set doesn't allow modifying content
-	// but as we know, occurances doesn't participate in hash key generation,
-	// so we can safely make it mutable
-	mutable int occurences;
-
-	number_set(const std::vector<T>& _numbers, int _occ = 1) :
-		numbers(_numbers),
-		occurences(_occ)
-	{}
-};
-
-template<typename T>
-struct hasher
-{
-	std::size_t operator()(number_set<T> const& s) const
-	{
-		return hash_value(s.numbers);
-	}
-};
-
-template<typename T>
-bool operator==(const number_set<T>& lhs, const number_set<T>& rhs)
-{
-	return lhs.numbers == rhs.numbers;
-}
 
 /*
 	interface for class number_sets
@@ -66,20 +40,13 @@ template<typename T, typename CharT = char>
 class number_sets : private noncopyable
 {
 public:
-	// type definitions
-	using string_type = std::basic_string<CharT>;
-	using data_container_type = std::unordered_set<number_set<T>, hasher<T>>;
-	using const_ref_data_container_type = const std::unordered_set<number_set<T>, hasher<T>>&;
-	using invalid_inputs_type = std::vector<std::basic_string<CharT>>;
-	using const_ref_invalid_inputs_type = const std::vector<std::basic_string<CharT>>&;
+	using data_type = number_sets_data<T, CharT>;
+	using string_type = typename data_type::string_type;
+	using const_ref_invalid_inputs_type = typename data_type::const_ref_invalid_inputs_type;
+	using const_ref_data_container_type = typename data_type::const_ref_data_container_type;
 
 private:
-	// variables
-	data_container_type data;
-	invalid_inputs_type invalid_inputs;
-	const number_set<T>* most_frequent;
-	int duplicate_count;
-	int non_duplicate_count;
+	data_type data;
 
 public:
 	// constructor
@@ -89,16 +56,21 @@ public:
 
 	// returns false for duplicate... true otherwise
 	bool add(const string_type& input);
+	// another add mechanism that works on the whole input file
+	// uses paraller programming to improve performance
+	// for now, only implemented for T = int and CharT = char
+	bool add_batch_mode(const string_type& filename, int producer_count);
 
 	// getters
 	const_ref_invalid_inputs_type get_invalid_inputs() const;
-	const number_set<T>* get_most_frequent_data() const;
+	const number_set<T> get_most_frequent_data() const;
 	int get_duplicate_count() const;
 	int get_non_duplicate_count() const;
 	const_ref_data_container_type get_data() const;
 
 private:
-	std::vector<T> get_sorted_number_set(const string_type& input);
+	std::vector<T> produce_number_set(const string_type& input);
+	bool consume_number_set(const std::vector<T>& input);
 };
 
 
@@ -107,10 +79,7 @@ private:
 */
 
 template<typename T, typename CharT>
-number_sets<T, CharT>::number_sets() :
-	most_frequent(nullptr),
-	duplicate_count(0),
-	non_duplicate_count(0)
+number_sets<T, CharT>::number_sets()
 {
 	static_assert(std::is_integral<T>::value, "Integral type required.");
 }
@@ -118,36 +87,34 @@ number_sets<T, CharT>::number_sets() :
 template<typename T, typename CharT>
 bool number_sets<T, CharT>::add(const string_type& input)
 {
-	auto res = data.emplace(get_sorted_number_set(input));
-	if (!res.second)
-		res.first->occurences++;
+	bool ret;
 
-	if (!most_frequent || most_frequent->occurences < res.first->occurences)
-		most_frequent = &(*res.first);
-
-	if (res.first->occurences == 1)
-		non_duplicate_count++;
-	else if (res.first->occurences == 2)
+	try
 	{
-		duplicate_count += 2;
-		non_duplicate_count--;
+		ret = consume_number_set(produce_number_set(input));
 	}
-	else
-		duplicate_count++;
+	catch (...)
+	{
+		data.invalid_inputs.push_back(input);
+		throw;
+	}
 
-	return res.first->occurences == 1;
+	return ret;
 }
 
 template<typename T, typename CharT>
 typename number_sets<T, CharT>::const_ref_invalid_inputs_type number_sets<T, CharT>::get_invalid_inputs() const
 {
-	return invalid_inputs;
+	return data.invalid_inputs;
 }
 
 template<typename T, typename CharT>
-const number_set<T>* number_sets<T, CharT>::get_most_frequent_data() const
+const number_set<T> number_sets<T, CharT>::get_most_frequent_data() const
 {
-	return most_frequent;
+	if (data.most_frequent)
+		return *data.most_frequent;
+
+	return number_set<T>{vector<T>{}, 0};
 }
 
 // default parsing using C++ stringstream
@@ -175,48 +142,41 @@ std::vector<int> get_numbers<int, char>(const std::string& input)
 }
 
 template<typename T, typename CharT>
-std::vector<T> number_sets<T, CharT>::get_sorted_number_set(const string_type& input)
+std::vector<T> number_sets<T, CharT>::produce_number_set(const string_type& input)
 {
-	std::vector<T> numbers;
-	bool add_failed = false;
-
-	try
-	{
-		numbers = get_numbers<T, CharT>(input);
-	}
-	catch (std::runtime_error&)
-	{
-		add_failed = true;
-	}
-
-	if (numbers.empty())
-		add_failed = true;
-
-	if (add_failed)
-	{
-		invalid_inputs.push_back(input);
-		throw std::runtime_error("Invalid input");
-	}
-
-	sort(numbers.begin(), numbers.end());
-
-	return numbers;
+	return ::produce_number_set<T, CharT>(input);
 }
 
 template<typename T, typename CharT>
 int number_sets<T, CharT>::get_duplicate_count() const
 {
-	return duplicate_count;
+	return data.duplicate_count;
 }
 
 template<typename T, typename CharT>
 int number_sets<T, CharT>::get_non_duplicate_count() const
 {
-	return non_duplicate_count;
+	return data.non_duplicate_count;
 }
 
 template<typename T, typename CharT>
 typename number_sets<T, CharT>::const_ref_data_container_type number_sets<T, CharT>::get_data() const
 {
-	return data;
+	return data.number_sets;
+}
+
+template<typename T, typename CharT>
+bool number_sets<T, CharT>::consume_number_set(const std::vector<T>& input)
+{
+	return ::consume_number_set<T, CharT>(input, data);
+}
+
+template<typename T, typename CharT>
+bool number_sets<T, CharT>::add_batch_mode(const string_type& filename, int producer_count)
+{
+	static_assert(std::is_same<T, int>::value && std::is_same<CharT, char>::value, "only T = int and CharT = char is accepted");
+
+	add_number_sets_parallel(filename, data, producer_count);
+
+	return true;
 }

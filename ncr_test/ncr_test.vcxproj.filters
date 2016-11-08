@@ -29,6 +29,12 @@
     <ClInclude Include="parse_ints_fast.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="add_number_sets_parallel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="number_sets_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="input.txt" />

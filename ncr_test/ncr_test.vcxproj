@@ -149,7 +149,9 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="add_number_sets_parallel.h" />
     <ClInclude Include="number_sets.h" />
+    <ClInclude Include="number_sets_data.h" />
     <ClInclude Include="parse_ints_fast.h" />
     <ClInclude Include="routines.h" />
   </ItemGroup>
