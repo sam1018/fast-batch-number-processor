@@ -146,17 +146,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="add_number_sets_concurrent.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="parse_ints_fast.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="add_number_sets_parallel.h" />
     <ClInclude Include="number_sets.h" />
-    <ClInclude Include="number_sets_data.h" />
-    <ClInclude Include="parse_ints_fast.h" />
+    <ClInclude Include="number_sets_impl.h" />
     <ClInclude Include="routines.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="input.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

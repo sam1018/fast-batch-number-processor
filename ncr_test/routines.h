@@ -8,16 +8,18 @@
 #include <functional> 
 
 
+
 /*
-	File: routines.h
-	Description: A header only file for various helper functions
-	Important Functions:
-		* hash_value: generates hash value for a container
-		* convertTo: converts a string to a given data type
-		* noncopyable class
-		* trim: trims whitespace from left and right for a string
-		* operator << overload for vector
+	a header only file
+	contains several general purpose functions, such as:
+	* hash_value - generates hash value from from a range of data
+	* convertTo - converts string to any other type, implemented using stringstream
+	* noncopyable - inherit this class to make your class noncopyable
+	* trim - trims whitespace from a string
+	* operator<< overload for vector
 */
+
+
 
 /*
 hash_value

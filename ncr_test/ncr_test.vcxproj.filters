@@ -18,6 +18,12 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="parse_ints_fast.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="add_number_sets_concurrent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="number_sets.h">
@@ -26,17 +32,8 @@
     <ClInclude Include="routines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="parse_ints_fast.h">
+    <ClInclude Include="number_sets_impl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="add_number_sets_parallel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="number_sets_data.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="input.txt" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,4 @@
 #include "number_sets.h"
-#include "number_sets_data.h"
 
 #include <assert.h>
 
@@ -13,6 +12,8 @@
 using namespace std;
 using namespace std::chrono;
 using namespace experimental::filesystem;
+
+using namespace ncr_test;
 
 
 /*
@@ -350,7 +351,7 @@ void test_duplicates()
 
 void test_non_copyable()
 {
-	// following code should fail to compile due to being non copyable
+	 //following code should fail to compile due to being non copyable
 	//number_sets<int> a;
 
 	//number_sets<int> b(a);
