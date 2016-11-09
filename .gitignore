@@ -241,3 +241,4 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 /ncr_test/large_data.txt
+/ncr_test/small_test.txt

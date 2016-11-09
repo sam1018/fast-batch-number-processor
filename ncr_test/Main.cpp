@@ -7,10 +7,12 @@
 #include <chrono>
 #include <random>
 #include <fstream>
+#include <filesystem>
 #include <unordered_map>
 
 using namespace std;
 using namespace std::chrono;
+using namespace experimental::filesystem;
 
 
 /*
@@ -358,34 +360,51 @@ void test_non_copyable()
 	//c = a;
 }
 
-void generate_large_data_set(const string& filename, int total_lines, int nums_per_line, int range)
+void generate_large_data_set(const string& filename, int total_lines, int nums_per_line, int duplicates)
 {
+	cout << "Generating large data set\n";
+	cout << "Data set size: sets-" << total_lines << ", numbers per set-" << nums_per_line << "\n";
+
 	ofstream ofile(filename);
 
-	for (int line = 0; line < total_lines; ++line)
+	string first_set;
+
+	for (int line = 0; line < total_lines - duplicates; ++line)
 	{
+		stringstream ss;
 		for (int i = 0; i < nums_per_line; ++i)
 		{
 			if (i != 0)
-				ofile << ", ";
-			ofile << rand() % range;
+				ss << ", ";
+			ss << rand();
 		}
-		ofile << "\n";
+		ss << "\n";
+
+		ofile << ss.str();
+
+		if (line == 0)
+			first_set = ss.str();
 	}
+
+	// it is very less likely for duplicates to happen with random numbers
+	// so doing it explicitly
+	for (int i = 0; i < duplicates; ++i)
+		ofile << first_set;
+
+	cout << "Finished generating large data set\n";
 }
 
 void test_large_data_set()
 {
 	string filename = "large_data.txt";
-	const int total_lines = 10'000'000;
-	const int nums_per_line = 10;
-	const int range = 20;
+	const int total_lines = 1'000'000;
+	const int nums_per_line = 100;
+	const int duplicates = 10;
 
-	cout << "Generating large data set\n";
-	cout << "Data set size: sets-" << total_lines << ", numbers per set-" << nums_per_line << "\n";
-	//generate_large_data_set(filename, total_lines, nums_per_line, range);
-	cout << "Finished generating large data set\n";
-
+	if (exists(filename))
+		cout << filename << " already exists. Not generating.\n";
+	else
+		generate_large_data_set(filename, total_lines, nums_per_line, duplicates);
 
 	cout << "Creating number sets\n";
 	system_clock::time_point start = system_clock::now();
@@ -394,13 +413,13 @@ void test_large_data_set()
 	number_sets<int> sets;
 
 	string line;
-	//while (getline(ifile, line))
-	//	sets.add(line);
+	while (getline(ifile, line))
+		sets.add(line);
 
 	cout << "Finished\n";
 	cout << "Duplicates: " << sets.get_duplicate_count() << " Non duplicates: " << sets.get_non_duplicate_count() << "\n";
-	auto most_frequent = sets.get_most_frequent_data();
-	cout << "Most Frequent: Occurence-" << most_frequent.occurences << " numbers-" << most_frequent.numbers << "\n";
+	//auto most_frequent = sets.get_most_frequent_data();
+	//cout << "Most Frequent: Occurence-" << most_frequent.occurences << " numbers-" << most_frequent.numbers << "\n";
 
 	system_clock::time_point end = system_clock::now();
 
@@ -416,12 +435,27 @@ void test_large_data_set()
 
 	cout << "Finished\n";
 	cout << "Duplicates: " << sets_batch_mode.get_duplicate_count() << " Non duplicates: " << sets_batch_mode.get_non_duplicate_count() << "\n";
-	auto most_frequent2 = sets_batch_mode.get_most_frequent_data();
-	cout << "Most Frequent: Occurence-" << most_frequent2.occurences << " numbers-" << most_frequent2.numbers << "\n";
+	//auto most_frequent2 = sets_batch_mode.get_most_frequent_data();
+	//cout << "Most Frequent: Occurence-" << most_frequent2.occurences << " numbers-" << most_frequent2.numbers << "\n";
 
 	end = system_clock::now();
 
 	cout << "Time taken: " << duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0 << "s\n";
+
+
+	// cross check between single add and batch mode add result
+
+	if (
+		sets.get_data().size() != sets_batch_mode.get_data().size() ||
+		sets.get_duplicate_count() != sets_batch_mode.get_duplicate_count() ||
+		sets.get_invalid_inputs() != sets.get_invalid_inputs() ||
+		sets.get_most_frequent_data().numbers != sets_batch_mode.get_most_frequent_data().numbers ||
+		sets.get_most_frequent_data().occurences != sets_batch_mode.get_most_frequent_data().occurences ||
+		sets.get_non_duplicate_count() != sets_batch_mode.get_non_duplicate_count()
+		)
+	{
+		cout << "ERROR!!! Results between single add and batch mode add doesn't match.\n";
+	}
 }
 
 void test_number_sets_small_getters(number_sets<int> &x)
